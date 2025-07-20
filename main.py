@@ -2,7 +2,7 @@ from graph import app
 
 initial_state = {
     "image_path": "data/sample.png",
-    "user_question": "What is written on the whiteboard?"
+    "user_question": "What is written on the whiteboard?" #Or get one from prompts/question.txt
 }
 
 result = app.invoke(initial_state)
