@@ -1,8 +1,15 @@
 from langchain.chat_models import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema import HumanMessage
 import base64
+import config as conf
 
-llm = ChatOpenAI(model="gpt-4-vision-preview")
+if (conf.VLM_model == conf.GOOGLE):
+    llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
+else:
+    llm = ChatOpenAI(model="gpt-4-vision-preview")
+
+
 
 def analyze_image(state):
     with open(state["image_path"], "rb") as img_file:
@@ -22,3 +29,6 @@ def analyze_image(state):
     response = llm([msg])
     state["image_caption"] = response.content
     return state
+
+
+
