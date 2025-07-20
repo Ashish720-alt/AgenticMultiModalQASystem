@@ -3,9 +3,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import config as conf
 
 if (conf.LLM_model == conf.GOOGLE):
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0) #Temperature 0 means not random!
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=conf.TEMP) 
 else:
-    llm = ChatOpenAI(model="gpt-4", temperature=0)
+    llm = ChatOpenAI(model="gpt-4", temperature=conf.TEMP)
 
 def generate_answer(state):
     prompt = f"""Based on the image caption: "{state['image_caption']}", 
