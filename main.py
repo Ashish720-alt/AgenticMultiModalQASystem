@@ -20,6 +20,11 @@ for state in input_states[:5]:
 
     result = app.invoke(initial_state)
 
-    print_terminal_and_file( f"For the query {state["user_question"]} on image {state["image_pat"]}, we get the answer: {result["image_caption"]}\n")
+    query = state["user_question"]
+    image_path = state["image_pat"]
+    # context = state["external_facts"]
+    response = result["image_caption"]
+
+    print_terminal_and_file( f"For the query {query} on image {image_path}, we get the answer: {response}\n")
     
     
