@@ -1,6 +1,11 @@
 from langchain.chat_models import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+import config as conf
 
-llm = ChatOpenAI(model="gpt-4", temperature=0)
+if (conf.LLM_model == conf.GOOGLE):
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0) #Temperature 0 means not random!
+else:
+    llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 def parse_question(state):
     prompt = f"Analyze this question and determine what the user is asking: {state['user_question']}. Respond concisely."
@@ -8,3 +13,4 @@ def parse_question(state):
     response = llm.predict(prompt)
     state["parsed_question"] = response
     return state
+
