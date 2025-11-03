@@ -1,34 +1,46 @@
-from langchain.chat_models import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.schema import HumanMessage
-import base64
-import config as conf
+# agents/vision_agent.py
+import os
+import warnings
+from huggingface_hub import InferenceClient
 
-if (conf.VLM_model == conf.GOOGLE):
-    llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
-else:
-    llm = ChatOpenAI(model="gpt-4-vision-preview")
+warnings.filterwarnings("ignore", category=UserWarning, module="langchain_community")
 
+# ✅ Get token automatically from environment
+HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN") or os.getenv("HF_TOKEN")
+if not HF_TOKEN:
+    raise EnvironmentError("Missing HF token. Set HF_TOKEN or HUGGINGFACEHUB_API_TOKEN.")
 
+# ✅ Use Zephyr (chat model)
+MODEL_ID = "HuggingFaceH4/zephyr-7b-alpha"
 
-def analyze_image(state):
-    with open(state["image_path"], "rb") as img_file:
-        #Reads the image as raw bytes (raw bytes are used for .jpg, .png files eg: b'\xff\xd8\xff\xe0').
-        image_bytes = img_file.read()
-        #Convert it to base64-encoded string, which is how OpenAI expects image input when using image_url mode. (base 64 - encoding is a way to only use printable ASCII charactars.)
-        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-    
-    # Builds a multi-part message: 1. A text prompt 2. An embedded base64 image.
-    # LangChain knows how to serialize this into the format GPT-4-Vision expects.
-    prompt = "Describe the contents of this image in detail."
-    # The url f"data:image/png;base64,{image_b64}" is a Base 64 Data URL i.e. a special URL which that embeds data directly in the URL itself,
-    # instead of pointing to an external file or resource. You could open this url in a browswer or supported VLM.
-    msg = HumanMessage(content=[{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}])
-    
-    # For LangChain's ChatOpenAI, response is an instance of some class which contains a content field storing the output of the LLM as a string.
-    response = llm([msg])
-    state["image_caption"] = response.content
-    return state
+client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
+def analyze_image(image_description: str) -> dict:
+    """
+    Uses a lightweight Hugging Face chat model to describe the image textually.
+    Returns a dict for LangGraph compatibility.
+    """
+    try:
+        prompt = (
+            f"You are an intelligent vision assistant. "
+            f"Given this description of an image:\n\n"
+            f"'{image_description}'\n\n"
+            f"Describe what this image likely contains in detail. "
+            f"Focus on objects, relationships, and possible context."
+        )
 
+        response = client.chat_completion(
+            model=MODEL_ID,
+            messages=[
+                {"role": "system", "content": "You are a concise, helpful visual reasoning assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=256,
+            temperature=0.3,
+            top_p=0.9,
+        )
 
+        text = response.choices[0].message["content"].strip()
+        return {"vision_output": text}   # ✅ return dict instead of string
+    except Exception as e:
+        return {"vision_output": f"[Vision Agent Error] {e}"}

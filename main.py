@@ -1,30 +1,26 @@
 from graph import app
-import json
+import json, time
+import graphConfig as conf
 
-def print_terminal_and_file(*args, **kwargs):
-    text = ' '.join(str(arg) for arg in args)
-    print(text, **kwargs)  # print to terminal
+def log(*args):
+    text = ' '.join(str(a) for a in args)
+    print(text)
     with open("output.txt", "a") as f:
         f.write(text + "\n")
-        
-        
-# Open and load the JSON file
+
+start = time.time()
+
 with open('input_states/input_states.json', 'r') as f:
-    input_states = json.load(f)
+    states = json.load(f)[:conf.BENCHMARK_INPUTS] 
 
-# 'data' is now a Python list of dictionaries
-print(f"Successfully loaded {len(input_states)} items.")
+log(f"Running {len(states)} image-question pairs ...\n")
 
-for state in input_states[:5]:
-    initial_state = state
+for i, s in enumerate(states, 1):
+    try:
+        res = app.invoke(s)
+        ans = res.get("final_answer", "No answer")
+        log(f"[{i}] Q: {s['user_question']}\nImage: {s['image_path']}\nA: {ans}\n{'-'*80}")
+    except Exception as e:
+        log(f"[{i}] ERROR: {e}\n")
 
-    result = app.invoke(initial_state)
-
-    query = state["user_question"]
-    image_path = state["image_pat"]
-    # context = state["external_facts"]
-    response = result["image_caption"]
-
-    print_terminal_and_file( f"For the query {query} on image {image_path}, we get the answer: {response}\n")
-    
-    
+log(f"Completed in {time.time()-start:.1f}s.")

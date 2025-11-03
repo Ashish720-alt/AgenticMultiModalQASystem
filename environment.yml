@@ -1,0 +1,29 @@
+name: langgraph-env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      # --- Core AI + Workflow Frameworks ---
+      - langgraph==0.0.21
+      - langchain==0.2.17
+      - langchain-core==0.2.43
+      - langchain-community==0.2.17
+      - langchain-huggingface>=0.0.5
+
+      # --- Hugging Face + Model Serving ---
+      - huggingface-hub
+      - transformers
+      - sentencepiece
+
+      # --- Streamlit UI + Progress Display ---
+      - streamlit
+      - tqdm
+      - pillow
+      - python-dotenv
+
+      # --- Optional Tools ---
+      - duckduckgo-search
+      - openai  # (kept for API compatibility)

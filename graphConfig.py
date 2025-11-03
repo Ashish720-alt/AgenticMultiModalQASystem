@@ -1,3 +1,5 @@
 YES = 1
 NO = 0
 RAG = NO
+
+BENCHMARK_INPUTS = 50

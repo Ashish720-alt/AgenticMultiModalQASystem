@@ -1,8 +1,17 @@
-from langchain.tools import DuckDuckGoSearchRun
+# agents/knowledge_agent.py
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="langchain_community")
+
+from langchain_community.tools import DuckDuckGoSearchRun
+
+# Simple search-based knowledge retriever
 search = DuckDuckGoSearchRun()
 
-def fetch_knowledge(state):
-    query = state.get("parsed_question") or state["user_question"] #If "parsed_question" is missing or empty, it falls back to the original "user_question"
-    result = search.run(query) #sends the query to DuckDuckGo and fetches search results. result is a string summary or concatenation of top search results returned by the tool
-    state["external_facts"] = result[:500]  # Limit size
-    return state
+def fetch_knowledge(query: str) -> str:
+    """
+    Fetches background knowledge from DuckDuckGo search.
+    """
+    try:
+        return search.run(query)
+    except Exception as e:
+        return f"[Knowledge Agent Error] {e}"
