@@ -8,8 +8,7 @@ Each agent performs a distinct role — vision analysis, question parsing, knowl
 ## 🧩 Architecture
 image → Vision Agent → Question Agent → Knowledge Agent → Answer Agent
 
-yaml
-Copy code
+
 
 - **Vision Agent** – analyzes the input image (via Hugging Face vision models).  
 - **Question Agent** – interprets user queries and transforms them into reasoning-ready prompts.  
